@@ -7,6 +7,8 @@ import PIL.Image
 import numpy as np
 import base64
 import io
+import shapely
+from scipy.spatial import cKDTree
 
 
 # calculation point of intersection ray from center on angle with segment
@@ -61,7 +63,6 @@ def containing(point_x, point_y, poligon):
     else:
         return True
 
-
 # calculation points of intersection rays from center with sides of a polygon
 def ray_casting(angle, poligon):
     points = np.array([[]])
@@ -79,15 +80,38 @@ def ray_casting(angle, poligon):
     return points
 
 
-# calculation of difference between polygon and parameterized poligon
-def error_calculation(parametrs, *args):
-    poligon_points, parameterized_poligon = args
+
+# calculation of difference between polygon and parameterized poligon by ray method
+def ray_error_calculation(parametrs, *args):
+    poligon_points, parameterized_poligon, metric_function_parameter = args
     parameterized_points = parameterized_poligon.calc(poligon_points[:, 0],
                                                       parametrs)
     error = 0
     for i in range(len(poligon_points)):
         error += np.abs(np.linalg.norm(poligon_points[i][1:]
                                        - parameterized_points[i][1:]))
+    return error
+
+
+def hausdorff_error_calculation(parametrs, *args):
+    poligon_points, parameterized_poligon, metric_function_parameter = args
+    vertex = parameterized_poligon.vertex_definition(poligon_points[:, 0], parametrs)
+    A = shapely.Polygon(poligon_points[:,1:])
+    B = shapely.Polygon(vertex)
+    
+    error = shapely.hausdorff_distance(A, B, densify=metric_function_parameter)
+
+    return error
+
+
+def frechet_error_calculation(parametrs, *args):
+    poligon_points, parameterized_poligon, metric_function_parameter = args
+    vertex = parameterized_poligon.vertex_definition(poligon_points[:, 0], parametrs)
+    A = shapely.Polygon(poligon_points[:,1:])
+    B = shapely.Polygon(vertex)
+    
+    error = shapely.frechet_distance(A, B, densify=metric_function_parameter)
+
     return error
 
 

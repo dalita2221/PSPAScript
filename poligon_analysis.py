@@ -68,18 +68,18 @@ class Particle():
         self.parametrs = dict()
 
 # method for calculation parametrs of poligon
-    def optimization(self, parameterized_poligon, x0=None):
+    def optimization(self, parameterized_poligon, metric_function=helper_functions.ray_error_calculation, metric_function_parameters=None, x0=None):
 
         if x0 is None:
             x0 = parameterized_poligon.default(self)
             minimization_results = minimize(
-                        helper_functions.error_calculation, x0,
-                        args=(self.poligon_points, parameterized_poligon),
+                        metric_function, x0,
+                        args=(self.poligon_points, parameterized_poligon, metric_function_parameters),
                         method='trust-constr')
         else:
-            minimization_results = minimize(
-                        helper_functions.error_calculation, x0,
-                        args=(self.poligon_points, parameterized_poligon),
+            minimization_results = minimize(metric_function
+                        , x0,
+                        args=(self.poligon_points, parameterized_poligon, metric_function_parameters),
                         method='trust-constr')
 
         self.parametrs[parameterized_poligon.name] = [

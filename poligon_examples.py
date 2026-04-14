@@ -14,7 +14,7 @@ class Hexogonal():
     name = 'hex'
     parametrs_name = ['fi', 'a/2', 'b/2', 'h/2']
 
-    def calc(self, angles, parametrs):
+    def vertex_definition(self, angles, parametrs):
         fi, a, b, h = parametrs
         self.poligon = np.array([[a, 0], [h, b], [-h, b], [-a, 0],
                                 [-h, -b], [h, -b], [a, 0]])
@@ -23,10 +23,13 @@ class Hexogonal():
         for i in range(len(self.poligon)):
             self.poligon[i] = self.poligon[i] @ matrix_rotation
 
-        self.parameterized_points = helper_functions.ray_casting(angles,
-                                                                 self.poligon)
+        return self.poligon
+    
+    def calc(self, angles, parametrs):
+        vertex=self.vertex_definition(angles, parametrs)
+        self.parameterized_points = helper_functions.ray_casting(angles, vertex)
         return self.parameterized_points
-
+        
 # calculation of x0 from basical parametrs of particle poligon
     def default(self, particle):
         return [particle.ORI[-1], particle.rm[-1],
@@ -38,7 +41,7 @@ class Rectangle():
     name = 'rec'
     parametrs_name = ['fi', 'a/2', 'b/2']
 
-    def calc(self, angles, parametrs):
+    def vertex_definition(self, angles, parametrs):
         fi, b, a = parametrs
         self.poligon = np.array([[b, a], [-b, a], [-b, -a], [b, -a], [b, a]])
         matrix_rotation = np.array([[np.cos(-np.arctan(a / b)),
@@ -53,8 +56,11 @@ class Rectangle():
         for i in range(len(self.poligon)):
             self.poligon[i] = self.poligon[i] @ matrix_rotation
 
-        self.parameterized_points = helper_functions.ray_casting(angles,
-                                                                 self.poligon)
+        return self.poligon
+    
+    def calc(self, angles, parametrs):
+        vertex=self.vertex_definition(angles, parametrs)
+        self.parameterized_points = helper_functions.ray_casting(angles, vertex)
         return self.parameterized_points
 
 # calculation of x0 from basical parametrs of particle poligon
@@ -66,18 +72,20 @@ class Rectangle():
 class Square():
     name = 'sq'
     parametrs_name = ['fi', 'a/2']
-
-    def calc(self, angles, parametrs):
+    def vertex_definition(self, angles, parametrs):
         fi, a = parametrs
         self.poligon = np.array([[a, a], [-a, a], [-a, -a], [a, -a], [a, a]])
         matrix_rotation = np.array([[np.cos(fi), -np.sin(fi)],
                                     [np.sin(fi), np.cos(fi)]])
         for i in range(len(self.poligon)):
             self.poligon[i] = self.poligon[i] @ matrix_rotation
-        self.parameterized_points = helper_functions.ray_casting(angles,
-                                                                 self.poligon)
-        return self.parameterized_points
 
+        return self.poligon
+    
+    def calc(self, angles, parametrs):
+        vertex=self.vertex_definition(angles, parametrs)
+        self.parameterized_points = helper_functions.ray_casting(angles, vertex)
+        return self.parameterized_points
 # calculation of x0 from basical parametrs of particle poligon
     def default(self, particle):
         return [particle.ORI[-1], particle.rm[-1] * np.sin(particle.ORI[-1])]
@@ -106,6 +114,8 @@ class Circle():
     def default(self, particle):
         return [particle.rm[-1]]
 
+    vertex_definition = calc
+
 
 # class for ellipsee poligons
 class Ellipse():
@@ -128,6 +138,8 @@ class Ellipse():
                      np.hstack([i, r * np.cos(i), r * np.sin(i)])])
 
         return self.parameterized_points
+        
+    vertex_definition = calc
 
 # calculation of x0 from basical parametrs of particle poligon
     def default(self, particle):
